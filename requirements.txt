@@ -1,0 +1,3 @@
+# GoodPay requires no external dependencies for local development.
+# Render PostgreSQL deployments require:
+pymongo[srv]==4.6.1

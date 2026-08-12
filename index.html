@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>GoodPay - Global Visa Card App</title>
+  <meta name="description" content="GoodPay is your premier RedotPay alternative for Virtual and Physical Visa Cards with instant Bangladeshi MFS deposits (bKash, Nagad, Rocket) and full admin management.">
+  
+  <!-- PWA & Mobile Web App Meta Tags -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#07090E">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="GoodPay">
+  <link rel="apple-touch-icon" href="/assets/icon.svg">
+  <link rel="icon" type="image/svg+xml" href="/assets/icon.svg">
+
+  <!-- Google Fonts: Inter, Outfit, Baloo Da 2 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+Da+2:wght@500;600;700;800&family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- Design System CSS -->
+  <link rel="stylesheet" href="css/style.css?v=2.4.3">
+</head>
+<body>
+
+  <!-- Sticky Global Navigation Bar -->
+  <header class="navbar" id="navbarContainer">
+    <!-- Rendered dynamically by app.js -->
+  </header>
+
+  <!-- Main View Container -->
+  <main class="app-container" id="mainContentContainer">
+    <!-- Views (Mobile App, Landing Page, Admin Panel) rendered dynamically -->
+  </main>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Main JavaScript App Controller -->
+  <script type="module" src="js/app.js?v=2.4.2"></script>
+
+  <!-- Register Service Worker for PWA -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then(reg => {
+            reg.update();
+            console.log('GoodPay ServiceWorker registered:', reg.scope);
+          })
+          .catch(err => console.log('ServiceWorker error:', err));
+      });
+    }
+  </script>
+</body>
+</html>
