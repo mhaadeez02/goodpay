@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GoodPay Admin Panel v2.0.0.1</title>
+  
+  <!-- FontAwesome 6 CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts: Baloo Da 2 & Outfit -->
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+Da+2:wght@400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="assets/css/style.css?v=2.4.4">
+</head>
+<body class="admin-body">
+
+  <!-- Admin Login Screen (Shown when logged out) -->
+  <div id="adminAuthScreen" style="width: 100%; display: flex; align-items: center; justify-content: center; min-height: 100vh;">
+    <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 40px; width: 100%; max-width: 420px; box-shadow: var(--shadow-lg);">
+      <div style="text-align: center; margin-bottom: 24px;">
+        <div style="width: 60px; height: 60px; background: var(--primary); color: #fff; border-radius: 16px; display: inline-flex; align-items: center; justify-content: center; font-size: 1.8rem; margin-bottom: 12px;">
+          <i class="fa-solid fa-shield-cat"></i>
+        </div>
+        <h2 style="font-size: 1.4rem; font-weight: 800;">GoodPay Admin Login</h2>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;">Management & Operations Portal</p>
+      </div>
+
+      <form id="adminLoginForm">
+        <div class="form-group">
+          <label class="form-label"><i class="fa-solid fa-user"></i> Admin Username</label>
+          <input type="text" id="adminUsernameInput" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label"><i class="fa-solid fa-key"></i> Password</label>
+          <input type="password" id="adminPasswordInput" class="form-control" required>
+        </div>
+        <button type="submit" class="btn-primary" style="margin-top: 10px;">
+          <span>Login to Dashboard</span>
+          <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Admin Dashboard Layout (Shown when logged in) -->
+  <div id="adminDashboardLayout" style="display: none; width: 100%;">
+    
+    <!-- Left Collapsible Sidebar -->
+    <aside id="adminSidebar" class="admin-sidebar">
+      <div id="sidebarToggleBtn" class="sidebar-header" title="Click logo to collapse/expand menu">
+        <div class="sidebar-logo">GP</div>
+        <div>
+          <div class="brand-name" style="font-weight: 800; font-size: 1.15rem; color: var(--text-main);">GoodPay Admin</div>
+          <div class="brand-name" style="font-size: 0.7rem; color: var(--text-muted);">Version 2.0.0.1</div>
+        </div>
+      </div>
+
+      <nav class="sidebar-menu">
+        <button class="sidebar-btn active" data-admin-tab="adminUsersTab">
+          <i class="fa-solid fa-users"></i>
+          <span class="sidebar-text">Users</span>
+        </button>
+        <button class="sidebar-btn" data-admin-tab="adminRequestsTab">
+          <i class="fa-solid fa-bell"></i>
+          <span class="sidebar-text">Recharge Requests</span>
+          <span id="requestsCountBadge" style="margin-left: auto; background: var(--danger); color: #fff; font-size: 0.7rem; padding: 2px 8px; border-radius: 10px; display: none;">0</span>
+        </button>
+        <button class="sidebar-btn" data-admin-tab="adminMfsTab">
+          <i class="fa-solid fa-sliders"></i>
+          <span class="sidebar-text">MFS Settings</span>
+        </button>
+        <button class="sidebar-btn" data-admin-tab="adminSettingsTab">
+          <i class="fa-solid fa-gear"></i>
+          <span class="sidebar-text">Settings</span>
+        </button>
+      </nav>
+
+      <div style="padding: 16px; border-top: 1px solid var(--border-color);">
+        <button id="adminLogoutBtn" onclick="adminLogout()" class="sidebar-btn" style="color: var(--danger);">
+          <i class="fa-solid fa-right-from-bracket"></i>
+          <span class="sidebar-text">Logout</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Workspace -->
+    <main class="admin-main">
+      
+      <!-- Admin Topbar -->
+      <header class="admin-topbar">
+        <div>
+          <h2 id="pageTitle" style="font-size: 1.5rem; font-weight: 800;">Registered Users</h2>
+          <p style="font-size: 0.85rem; color: var(--text-muted);">Manage platform users and virtual card accounts</p>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+          <div id="dbStatusBadge" style="display: flex; align-items: center; gap: 8px; background: rgba(255, 193, 7, 0.1); padding: 8px 16px; border-radius: 30px; border: 1px solid rgba(255, 193, 7, 0.3); font-size: 0.85rem; font-weight: 600; color: var(--text-primary);">
+            <div id="dbStatusDot" style="width: 10px; height: 10px; border-radius: 50%; background: #ffc107; box-shadow: 0 0 8px #ffc107;"></div>
+            <span id="dbStatusText">Checking DB...</span>
+          </div>
+          <button id="adminThemeToggleBtn" class="theme-toggle-btn" title="Toggle Light/Dark Theme">
+            <i class="fa-solid fa-moon"></i>
+          </button>
+          <div style="display: flex; align-items: center; gap: 10px; background: var(--bg-surface); padding: 8px 16px; border-radius: 30px; border: 1px solid var(--border-color);">
+            <div style="width: 32px; height: 32px; background: var(--primary-light); color: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800;">M</div>
+            <span id="adminNameDisplay" style="font-weight: 700; font-size: 0.9rem;">Masud Admin</span>
+          </div>
+          <button id="adminTopLogoutBtn" onclick="adminLogout()" class="btn-sm btn-danger" style="padding: 8px 16px; font-weight: 700; font-size: 0.85rem; border-radius: 20px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: var(--shadow-sm);" title="Logout of Admin Panel">
+            <i class="fa-solid fa-right-from-bracket"></i> <span>Log Out</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Toast Container -->
+      <div id="adminToastContainer" class="toast-container"></div>
+      
+      <!-- Hidden File Inputs for Import -->
+      <input type="file" id="usersImportInput" accept=".json" style="display: none;">
+      <input type="file" id="requestsImportInput" accept=".json" style="display: none;">
+
+      <!-- Tab 1: Users Listing & Master Profile Trigger -->
+      <section id="adminUsersTab" class="admin-tab-content">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; gap: 12px; flex-wrap: wrap;">
+          <div style="display: flex; gap: 10px; align-items: center; flex: 1; flex-wrap: wrap;">
+            <input type="text" id="userSearchInput" class="form-control" placeholder="Search by phone, username or card number..." style="max-width: 320px;">
+            <button type="button" id="bulkDeleteUsersBtn" onclick="bulkDeleteUsers()" class="btn-sm btn-danger" style="padding: 9px 16px; font-weight: 700; font-size: 0.85rem; border-radius: var(--radius-md); box-shadow: var(--shadow-sm); cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+              <i class="fa-solid fa-trash-can"></i> <span>Delete Selected</span> (<span id="selectedUsersCount">0</span>)
+            </button>
+            <button type="button" id="exportUsersBtn" class="btn-sm btn-info" style="padding: 9px 16px; font-weight: 700; font-size: 0.85rem; border-radius: var(--radius-md); box-shadow: var(--shadow-sm); cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+              <i class="fa-solid fa-download"></i> <span>Export</span>
+            </button>
+            <button type="button" id="importUsersBtn" class="btn-sm btn-secondary" style="padding: 9px 16px; font-weight: 700; font-size: 0.85rem; border-radius: var(--radius-md); box-shadow: var(--shadow-sm); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; background: #64748b; color: white;">
+              <i class="fa-solid fa-upload"></i> <span>Import</span>
+            </button>
+          </div>
+          <button id="refreshUsersBtn" class="btn-secondary" style="width: auto;"><i class="fa-solid fa-rotate"></i> Refresh</button>
+        </div>
+
+        <div class="data-table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th style="width: 44px; text-align: center;">
+                  <input type="checkbox" id="selectAllUsers" onchange="toggleSelectAllUsers(this.checked)" style="cursor: pointer; width: 16px; height: 16px; vertical-align: middle;" title="Select All Users">
+                </th>
+                <th>ID</th>
+                <th>Phone Number</th>
+                <th>Username</th>
+                <th>Card Number</th>
+                <th>Balance</th>
+                <th>Card Status</th>
+                <th>Verified</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="usersTableBody">
+              <!-- Rendered dynamically by admin.js -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Users Pagination Control (10 per page) -->
+        <div id="usersPagination" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 18px; background: var(--bg-surface); border: 1px solid var(--border-color); border-top: none; border-radius: 0 0 var(--radius-lg) var(--radius-lg); margin-bottom: 24px;">
+          <button id="usersPrevBtn" class="btn-secondary" style="width: auto; padding: 6px 14px; font-size: 0.85rem;" disabled>
+            <i class="fa-solid fa-chevron-left"></i> Previous
+          </button>
+          <span id="usersPageInfo" style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted);">Page 1 of 1</span>
+          <button id="usersNextBtn" class="btn-secondary" style="width: auto; padding: 6px 14px; font-size: 0.85rem;" disabled>
+            Next <i class="fa-solid fa-chevron-right"></i>
+          </button>
+        </div>
+      </section>
+
+      <!-- Tab 2: Recharge Requests & Card Purchase Approvals -->
+      <section id="adminRequestsTab" class="admin-tab-content" style="display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; gap: 12px; flex-wrap: wrap;">
+          <div style="display: flex; gap: 14px; align-items: center; flex-wrap: wrap;">
+            <h3 style="font-size: 1.1rem; font-weight: 800; margin: 0;">All Purchases & Recharge History</h3>
+            <button type="button" id="bulkDeleteRequestsBtn" onclick="bulkDeleteRequests()" class="btn-sm btn-danger" style="padding: 9px 16px; font-weight: 700; font-size: 0.85rem; border-radius: var(--radius-md); box-shadow: var(--shadow-sm); cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+              <i class="fa-solid fa-trash-can"></i> <span>Delete Selected</span> (<span id="selectedRequestsCount">0</span>)
+            </button>
+            <button type="button" id="exportRequestsBtn" class="btn-sm btn-info" style="padding: 9px 16px; font-weight: 700; font-size: 0.85rem; border-radius: var(--radius-md); box-shadow: var(--shadow-sm); cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+              <i class="fa-solid fa-download"></i> <span>Export</span>
+            </button>
+            <button type="button" id="importRequestsBtn" class="btn-sm btn-secondary" style="padding: 9px 16px; font-weight: 700; font-size: 0.85rem; border-radius: var(--radius-md); box-shadow: var(--shadow-sm); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; background: #64748b; color: white;">
+              <i class="fa-solid fa-upload"></i> <span>Import</span>
+            </button>
+          </div>
+          <button id="refreshRequestsBtn" class="btn-secondary" style="width: auto;"><i class="fa-solid fa-rotate"></i> Refresh</button>
+        </div>
+
+        <div class="data-table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th style="width: 44px; text-align: center;">
+                  <input type="checkbox" id="selectAllRequests" style="cursor: pointer; width: 16px; height: 16px; vertical-align: middle;" title="Select All Requests">
+                </th>
+                <th>Type</th>
+                <th>User Phone</th>
+                <th>Method</th>
+                <th>Sender Number</th>
+                <th>Amount (USD / BDT)</th>
+                <th>Date</th>
+                <th>Status / Actions</th>
+              </tr>
+            </thead>
+            <tbody id="requestsTableBody">
+              <!-- Rendered dynamically by admin.js -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Requests Pagination Control (10 per page) -->
+        <div id="requestsPagination" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 18px; background: var(--bg-surface); border: 1px solid var(--border-color); border-top: none; border-radius: 0 0 var(--radius-lg) var(--radius-lg); margin-bottom: 24px;">
+          <button id="requestsPrevBtn" class="btn-secondary" style="width: auto; padding: 6px 14px; font-size: 0.85rem;" disabled>
+            <i class="fa-solid fa-chevron-left"></i> Previous
+          </button>
+          <span id="requestsPageInfo" style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted);">Page 1 of 1</span>
+          <button id="requestsNextBtn" class="btn-secondary" style="width: auto; padding: 6px 14px; font-size: 0.85rem;" disabled>
+            Next <i class="fa-solid fa-chevron-right"></i>
+          </button>
+        </div>
+      </section>
+
+      <!-- Tab 3: MFS Settings -->
+      <section id="adminMfsTab" class="admin-tab-content" style="display: none;">
+        <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 30px; max-width: 680px; box-shadow: var(--shadow-sm);">
+          <h3 style="font-size: 1.2rem; font-weight: 800; margin-bottom: 20px;">
+            <i class="fa-solid fa-sliders" style="color: var(--primary);"></i> Mobile Financial Services (MFS) Configuration
+          </h3>
+
+          <form id="mfsSettingsForm">
+            <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--text-muted); margin-bottom: 14px; text-transform: uppercase;">Receiving Personal Numbers</h4>
+            <div class="form-group">
+              <label class="form-label">bKash Personal Number</label>
+              <input type="text" id="mfsBkashInput" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Nagad Personal Number</label>
+              <input type="text" id="mfsNagadInput" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Rocket Personal Number</label>
+              <input type="text" id="mfsRocketInput" class="form-control" required>
+            </div>
+
+            <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--text-muted); margin: 24px 0 14px 0; text-transform: uppercase;">Pricing & Rates</h4>
+            <div class="form-group">
+              <label class="form-label">Card Purchase Price (BDT)</label>
+              <input type="number" id="mfsCardPriceInput" class="form-control" step="1" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Card Activation Fee (USD) <small style="color:#94a3b8;">(Total user pays)</small></label>
+              <input type="number" id="mfsActivationFeeInput" class="form-control" step="0.01" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Card Balance Credit (USD) <small style="color:#4ade80;">(Added to card on activation)</small></label>
+              <input type="number" id="mfsBalanceCreditInput" class="form-control" step="0.01" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">USD to BDT Exchange Rate (1 USD)</label>
+              <input type="number" id="mfsUsdRateInput" class="form-control" step="0.5" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Cash Out Charge Percentage (%)</label>
+              <input type="number" id="mfsChargePctInput" class="form-control" step="0.1" required>
+            </div>
+
+            <button type="submit" class="btn-primary" style="margin-top: 10px;">
+              <i class="fa-solid fa-floppy-disk"></i> Save Settings
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <!-- Tab 4: General Settings -->
+      <section id="adminSettingsTab" class="admin-tab-content" style="display: none;">
+        <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 30px; max-width: 600px; box-shadow: var(--shadow-sm);">
+          <h3 style="font-size: 1.2rem; font-weight: 800; margin-bottom: 18px;">Admin Profile Settings</h3>
+          <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 20px;">Administrator credentials management</p>
+
+          <div class="form-group">
+            <label class="form-label">Admin Username</label>
+            <input type="text" class="form-control" value="masud" disabled>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Status</label>
+            <input type="text" class="form-control" value="Super Administrator (Active)" disabled>
+          </div>
+          <div class="form-group">
+            <label class="form-label">System Version</label>
+            <input type="text" class="form-control" value="GoodPay v2.0.0.1 Full-Stack" disabled>
+          </div>
+
+          <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border-color);">
+            <button type="button" onclick="adminLogout()" class="btn-primary" style="background: var(--danger); border-color: var(--danger); width: 100%; justify-content: center; gap: 8px;">
+              <i class="fa-solid fa-right-from-bracket"></i> Log Out from Admin Panel
+            </button>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Master User Profile Popup Modal (Full Admin CRUD) -->
+  <div id="masterProfileModal" class="modal-overlay">
+    <div class="modal-box" style="max-width: 720px;">
+      <div class="modal-header">
+        <h3 style="font-size: 1.2rem; font-weight: 800;">Master User Profile & CRUD</h3>
+        <button class="modal-close closeModalBtn"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <form id="masterUserForm">
+        <input type="hidden" id="masterUserId">
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div class="form-group">
+            <label class="form-label">Username</label>
+            <input type="text" id="masterUsername" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Phone Number</label>
+            <input type="text" id="masterPhone" class="form-control" required>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input type="email" id="masterEmail" class="form-control">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <input type="text" id="masterPassword" class="form-control" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Verification Status</label>
+          <select id="masterVerified" class="form-control">
+            <option value="0">Not Verified</option>
+            <option value="1">Verified</option>
+          </select>
+        </div>
+
+        <hr style="border: none; border-top: 1px solid var(--border-color); margin: 20px 0;">
+        <h4 style="font-size: 1rem; font-weight: 700; color: var(--primary); margin-bottom: 14px;">Virtual Card Details</h4>
+
+        <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label class="form-label">Card Number</label>
+            <input type="text" id="masterCardNumber" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">CVV</label>
+            <input type="text" id="masterCvv" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Expiry Date</label>
+            <input type="text" id="masterExpiry" class="form-control" placeholder="MM/YY" required>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div class="form-group">
+            <label class="form-label">Balance ($ USD)</label>
+            <input type="number" id="masterBalance" class="form-control" step="0.01" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Card Status</label>
+            <select id="masterCardStatus" class="form-control">
+              <option value="unpurchased">Unpurchased</option>
+              <option value="processing">Processing</option>
+              <option value="active">Active</option>
+            </select>
+          </div>
+        </div>
+
+        <h4 style="font-size: 0.95rem; font-weight: 700; margin: 16px 0 10px 0;">Add Custom Transaction</h4>
+        <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 12px; margin-bottom: 20px;">
+          <div style="display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 12px; align-items: end;">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label">Transaction Name (e.g. Bonus)</label>
+              <input type="text" id="customTxName" class="form-control" placeholder="Transaction Name">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label">Amount ($)</label>
+              <input type="number" id="customTxAmount" class="form-control" step="0.01" placeholder="0.00">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label">Action</label>
+              <select id="customTxAction" class="form-control">
+                <option value="fund">Fund (+)</option>
+                <option value="deduct">Deduct (-)</option>
+              </select>
+            </div>
+            <button type="button" id="addCustomTxBtn" class="btn-primary" style="padding: 10px 16px; margin-bottom: 2px;">
+              <i class="fa-solid fa-plus"></i> Add
+            </button>
+          </div>
+        </div>
+
+        <h4 style="font-size: 0.95rem; font-weight: 700; margin: 16px 0 10px 0;">User Transaction History</h4>
+        <div id="masterUserHistory" style="max-height: 180px; overflow-y: auto; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 12px; font-size: 0.85rem; margin-bottom: 20px;">
+          <!-- History logs rendered by admin.js -->
+        </div>
+
+        <div style="display: flex; gap: 12px;">
+          <button type="submit" class="btn-primary" style="flex: 1;">
+            <i class="fa-solid fa-floppy-disk"></i> Save Master Changes
+          </button>
+          <button type="button" class="btn-secondary closeModalBtn" style="width: auto;">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Custom Admin Script -->
+  <script src="assets/js/admin.js?v=2.4.5"></script>
+</body>
+</html>
